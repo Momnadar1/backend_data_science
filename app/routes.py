@@ -9,10 +9,12 @@ from sklearn.svm import SVC
 from sklearn.metrics import confusion_matrix 
 from sklearn.metrics import accuracy_score 
 from sklearn.metrics import classification_report 
+from transformers import GPT2LMHeadModel, GPT2Tokenizer, BertTokenizer, BertForMaskedLM
 
 DATASETS_DIR = 'datasets'
 FEATURE_COLUMNS_FILE = 'features.json'
 SELECTED_MODEL_FILE = 'selected_model.json'
+MC_MODEL = 'GPT2'
 
 models = {
         "LogisticRegression" : {
@@ -218,3 +220,35 @@ def test():
     print ('Report : ')
     print( classification_report(y_train, predicted) )
     return jsonify({'success': True})
+
+def gpt2_generate_response(input_text):
+        # tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+        # model = GPT2LMHeadModel.from_pretrained('gpt2')
+        tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+        model = BertForMaskedLM.from_pretrained("bert-base-uncased")
+        input_ids = tokenizer.encode(input_text, return_tensors="pt")
+        output = model.generate(input_ids, max_length=100, num_return_sequences=1)
+        generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
+        return generated_text
+
+def bert_generate_text(prompt):
+    tokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+    model = BertForMaskedLM.from_pretrained("bert-base-uncased")
+    input_ids = tokenizer.encode(prompt, return_tensors="pt")
+    output = model.generate(input_ids, max_length=100, num_return_sequences=1, pad_token_id=tokenizer.eos_token_id)
+    generated_text = tokenizer.decode(output[0], skip_special_tokens=True)
+    return generated_text
+
+
+@app.route("/mc_models", methods=['POST', 'GET'])
+def chat_functionality():
+    global MC_MODEL
+    MC_MODEL = 'BERT-BASE-UCASED'
+    if request.method == 'POST':
+        user_input = request.json.get('user_input', '')
+        if MC_MODEL:
+            response = gpt2_generate_response(user_input)
+        else:
+            response = bert_generate_text(user_input)
+        return jsonify({"response": response})
+
