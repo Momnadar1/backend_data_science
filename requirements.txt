@@ -3,3 +3,4 @@ pandas
 flask
 transformers
 torch
+matplotlib
