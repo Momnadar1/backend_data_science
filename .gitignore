@@ -1,2 +1,3 @@
 .venv
 app/__pycache__/*
+jupyter-notebooks/fine_tuned_gpt2/*
