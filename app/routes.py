@@ -15,6 +15,7 @@ import uuid
 import joblib
 import matplotlib.pyplot as plt
 import io
+from transformers import GPT2LMHeadModel, GPT2Tokenizer, BertTokenizer, BertForMaskedLM
 
 DATASETS_DIR = 'datasets'
 FEATURE_COLUMNS_FILE = 'features.json'
@@ -25,6 +26,22 @@ train_percentage = None
 test_percentage = None
 selected_model = None
 unselected_columns = None
+
+
+berttokenizer = BertTokenizer.from_pretrained("bert-base-uncased")
+bertmodel = BertForMaskedLM.from_pretrained("bert-base-uncased")
+
+gpt2tokenizer = GPT2Tokenizer.from_pretrained('gpt2')
+gpt2model = GPT2LMHeadModel.from_pretrained('gpt2')
+
+llm_models = {
+    "BERT-BASE-UNCASED" : {
+        'type': ['Masking Word Prediction']
+    },
+    "GPT2" : {
+        'type': ['Auto Complete', 'Text Generation', 'Text Completion']
+    }
+}
 
 models = {
         "LogisticRegression" : {
@@ -305,3 +322,30 @@ def generate_histogram():
     plt.close()
 
     return jsonify('success', True)
+
+def gpt2_generate_response(input_text):
+    input_ids = gpt2tokenizer.encode(input_text, return_tensors="pt")
+    output = gpt2model.generate(input_ids, max_length=100, num_return_sequences=1)
+    generated_text = gpt2tokenizer.decode(output[0], skip_special_tokens=True)
+    return generated_text
+
+def bert_generate_text(input_text):
+    input_ids = berttokenizer.encode(input_text, return_tensors="pt")
+    output = bertmodel.generate(input_ids, max_length=100, num_return_sequences=1, pad_token_id=berttokenizer.eos_token_id)
+    generated_text = berttokenizer.decode(output[0], skip_special_tokens=True)
+    return generated_text
+
+@app.route("/llm_tunings")
+def llm_tuning():
+    pass
+
+@app.route("/llm_models", methods=['POST', 'GET'])
+def llm_models():
+    if request.method == 'POST':
+        data = request.json
+        user_input = data.get('user_input')
+        user_output = gpt2_generate_response(user_input)
+        return jsonify({'user_output': user_output})
+    elif request.method == 'GET':
+        return jsonify({'models': list(llm_models.keys())})
+    return jsonify({'error': 'Please! select a valid method'})
