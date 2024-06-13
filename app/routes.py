@@ -154,7 +154,7 @@ def get_unselected_columns():
 
 def save_selected_model(model_name):
     with open(SELECTED_MODEL_FILE, 'w') as f:
-        f.write(json.dumps({'models':list(model_name)}))
+        f.write(json.dumps({'models':(model_name)}))
         
 def load_selected_model():
     if os.path.exists(SELECTED_MODEL_FILE):
