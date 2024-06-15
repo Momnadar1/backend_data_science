@@ -46,6 +46,7 @@ llm_models = {
 models = {
         "LogisticRegression" : {
             "type": "Classification", 
+            "description": "Logistic Regression blah blah testing!",
             "hyperparameters": {
                 "C": 1.0, 
                 "solver": "lbfgs"
@@ -154,7 +155,7 @@ def get_unselected_columns():
 
 def save_selected_model(model_name):
     with open(SELECTED_MODEL_FILE, 'w') as f:
-        f.write(json.dumps({'models':(model_name)}))
+        f.write(json.dumps({'models':model_name}))
         
 def load_selected_model():
     if os.path.exists(SELECTED_MODEL_FILE):
@@ -249,16 +250,16 @@ def train_model():
             return jsonify({'error': 'No model selected'}), 400
         
         model = None
-        if model_name[0] == 'LogisticRegression':
-            model = LogisticRegression(**models[model_name[0]]['hyperparameters'])
-        elif model_name[0] == 'SVC':
-            model = SVC(**models[model_name[0]]['hyperparameters'])
-        elif model_name[0] == 'MLPClassifier':
-            model = MLPClassifier(**models[model_name[0]]['hyperparameters'])
-        elif model_name[0] == 'GaussianNB':
+        if model_name == 'LogisticRegression':
+            model = LogisticRegression(**models[model_name]['hyperparameters'])
+        elif model_name == 'SVC':
+            model = SVC(**models[model_name]['hyperparameters'])
+        elif model_name == 'MLPClassifier':
+            model = MLPClassifier(**models[model_name]['hyperparameters'])
+        elif model_name == 'GaussianNB':
             model = GaussianNB()
-        elif model_name[0] == 'MultinomialNB':
-            model = MultinomialNB(**models[model_name[0]]['hyperparameters'])
+        elif model_name == 'MultinomialNB':
+            model = MultinomialNB(**models[model_name]['hyperparameters'])
         else:
             return jsonify({'error': 'Selected model is not supported'}), 400
 
