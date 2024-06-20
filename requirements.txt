@@ -3,3 +3,4 @@ pandas
 flask
 matplotlib
 Flask-Cors
+transformers
