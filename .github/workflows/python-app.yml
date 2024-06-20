@@ -37,6 +37,13 @@ jobs:
     # - name: Test with pytest
     #   run: |
     #     pytest
-    - name: Test with run app
-      run: |
-        python run.py
+    # - name: Test with run app
+    #   run: |
+    #     python run.py
+    - name: Build and Push Docker Image
+      uses: mr-smithers-excellent/docker-build-push@v4
+      with:
+        image: momnadar1/demo-python-app
+        registry: docker.io
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
